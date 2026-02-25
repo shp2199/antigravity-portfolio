@@ -10,13 +10,28 @@ const greetings = [
     { text: "你好世界", lang: "Chinese", color: "#0076a3" }
 ];
 
-let currentIndex = 0;
+let currentIndex = 1; // Start at 1 so the first click goes to index 2
 const title = document.querySelector('h1');
 const subline = document.querySelector('p');
 const container = document.querySelector('.container');
 
+// Initial state - check if it's currently Home
+window.addEventListener('load', () => {
+    const hash = window.location.hash.substring(1) || 'home';
+    if (hash === 'home') {
+        const korean = greetings[1]; // 안녕 세상아
+        title.innerText = korean.text;
+        title.style.color = korean.color;
+        subline.innerText = `Greeting in ${korean.lang}`;
+        title.style.display = 'block';
+    }
+});
+
 function updateGreeting() {
+    // Skip Korean (index 1) on subsequent clicks
     currentIndex = (currentIndex + 1) % greetings.length;
+    if (currentIndex === 1) currentIndex = (currentIndex + 1) % greetings.length;
+
     const current = greetings[currentIndex];
 
     container.classList.add('bouncing');
@@ -28,6 +43,7 @@ function updateGreeting() {
         container.classList.remove('bouncing');
     }, 200);
 }
+
 
 if (container) {
     container.addEventListener('click', updateGreeting);
@@ -77,15 +93,14 @@ document.addEventListener('mousemove', (e) => {
     const x = e.clientX;
     const y = e.clientY;
 
-    // Cursor movement (aligned with triangle tip)
-    // Add -30deg tilt as requested
+    // Cursor movement with -30deg tilt
     cursorOuter.style.transform = `translate(${x}px, ${y}px) rotate(-30deg)`;
     cursorInner.style.transform = `translate(${x}px, ${y}px) rotate(-30deg)`;
-
 
     // Create Fairy Dust (Particles)
     createDust(x, y);
 });
+
 
 function createDust(x, y) {
     const dust = document.createElement('div');
@@ -143,11 +158,9 @@ function updateActiveSection(targetId) {
             // Randomize Profile Name in About section
             const profileName = section.querySelector('.profile-name');
             if (profileName) {
-                let nameColor;
-                // Ensure name tag color is distinct from H2
-                // Filter colors to remove similar ones if possible, but at least not the same
+                // Stricter distinct color: exclude usedH2Color and similar ones if possible
                 const distinctColors = activeColors.filter(c => c !== usedH2Color);
-                nameColor = distinctColors[Math.floor(Math.random() * distinctColors.length)];
+                const nameColor = distinctColors[Math.floor(Math.random() * distinctColors.length)];
                 profileName.style.background = nameColor;
             }
         }
@@ -155,17 +168,44 @@ function updateActiveSection(targetId) {
 
     navLinks.forEach(link => {
         link.classList.remove('active-nav');
-        const isCurrentlyActive = link.getAttribute('href').substring(1) === targetId;
+        const linkId = link.getAttribute('href').substring(1);
 
-        if (isCurrentlyActive) {
+        if (linkId === targetId) {
             link.classList.add('active-nav');
-            link.style.background = '#ffffff'; // White background for active as requested
+            link.style.background = '#ffffff'; // White for active
+            link.style.color = '#000000';
         } else {
-            // Randomize box color for inactive ones
+            // Random color for inactive
             link.style.background = activeColors[Math.floor(Math.random() * activeColors.length)];
+            link.style.color = '#2b2b2b';
         }
     });
 }
+
+// Sync Nav with Scroll Position (for Snap Scroll)
+document.addEventListener('scroll', () => {
+    let current = "";
+    sections.forEach((section) => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (window.pageYOffset >= sectionTop - sectionHeight / 3) {
+            current = section.getAttribute("id");
+        }
+    });
+
+    if (current) {
+        navLinks.forEach((link) => {
+            link.classList.remove("active-nav");
+            if (link.getAttribute("href").includes(current)) {
+                link.classList.add("active-nav");
+                link.style.background = '#ffffff';
+            } else {
+                // Don't re-randomize color on scroll, just keep them unless clicked
+            }
+        });
+    }
+}, { passive: true });
+
 
 
 navLinks.forEach(link => {
@@ -215,27 +255,11 @@ const charData = {
 };
 
 charOpts.forEach(opt => {
-    const charType = opt.dataset.char;
-    const previewCanvas = opt.querySelector('canvas');
-    if (previewCanvas) {
-        const pctx = previewCanvas.getContext('2d');
-        // Helper to draw previews
-        function drawPreview(type) {
-            pctx.clearRect(0, 0, 40, 40);
-            // Save global ctx to restore later
-            const originalCtx = ctx;
-            // Temporarily swap ctx to preview ctx for drawPokemon
-            window.ctx = pctx;
-            // drawPokemon uses global ctx, but it's risky. Let's make drawPokemon take ctx.
-            // I'll update drawPokemon below.
-        }
-    }
-
     opt.addEventListener('click', () => {
         charOpts.forEach(o => o.classList.remove('active'));
         opt.classList.add('active');
-        player.char = charType;
-        player.color = charData[charType].color;
+        player.char = opt.dataset.char;
+        player.color = charData[player.char].color;
     });
 });
 
@@ -246,11 +270,13 @@ function initCharacterPreviews() {
         const canvas = opt.querySelector('canvas');
         if (canvas) {
             const pctx = canvas.getContext('2d');
-            drawPokemon(charType, 5, 5, 30, pctx); // Pass canvas context
+            pctx.clearRect(0, 0, 40, 40);
+            drawPokemon(charType, 5, 5, 30, pctx);
         }
     });
 }
 window.addEventListener('load', initCharacterPreviews);
+
 
 
 function drawPokemon(type, x, y, size, targetCtx = ctx) {
@@ -386,13 +412,17 @@ function drawEnemies() {
 function gameOver() {
     gameRunning = false;
     cancelAnimationFrame(frameId);
+    const leaderboard = document.getElementById('leaderboard');
     if (isHighScore(score)) {
         scoreForm.style.display = 'block';
+        if (leaderboard) leaderboard.style.display = 'block';
     } else {
         alert(`GAME OVER! Final Score: ${score}`);
+        if (leaderboard) leaderboard.style.display = 'block';
         exitGame();
     }
 }
+
 
 function exitGame() {
     gameArea.style.display = 'none';
@@ -428,11 +458,18 @@ function gameLoop() {
 
 document.addEventListener('keydown', (e) => {
     if (!gameRunning) return;
+
+    // Prevent default scrolling for arrow keys when game is running
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'a', 's', 'd'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+    }
+
     const move = 30;
     if (['ArrowUp', 'w', 'W'].includes(e.key)) { player.y -= move; score++; }
     if (['ArrowDown', 's', 'S'].includes(e.key)) player.y += move;
     if (['ArrowLeft', 'a', 'A'].includes(e.key)) player.x -= move;
     if (['ArrowRight', 'd', 'D'].includes(e.key)) player.x += move;
+
 
     player.x = Math.max(0, Math.min(500 - player.size, player.x));
     player.y = Math.max(-player.size, Math.min(460, player.y));

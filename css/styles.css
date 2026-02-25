@@ -18,14 +18,24 @@
     font-family: 'Outfit', sans-serif;
 }
 
+html,
+body {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+    /* Enable snap scroll */
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
-    min-height: 100vh;
-    overflow-x: hidden;
     cursor: none;
     /* Hide default cursor */
 }
+
 
 /* Bright & Vivid Background */
 .background {
@@ -35,45 +45,45 @@ body {
     width: 100vw;
     height: 100vh;
     z-index: -2;
-    filter: blur(80px);
-    /* Increased blur */
-    opacity: 0.6;
+    filter: blur(100px);
+    /* Smoother blending */
+    opacity: 0.7;
     overflow: hidden;
 }
 
 .blob {
     position: absolute;
     border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
-    mix-blend-mode: screen;
+    mix-blend-mode: color-burn;
     /* Color blending */
-    opacity: 0.45;
+    opacity: 0.5;
 }
 
 .blob-1 {
-    width: 90vw;
-    height: 90vw;
+    width: 120vw;
+    height: 120vw;
     background: var(--lego-red);
-    top: -20%;
-    left: -20%;
-    animation: moveBig 30s infinite alternate ease-in-out;
+    top: -30%;
+    left: -30%;
+    animation: moveBig 45s infinite alternate ease-in-out;
 }
 
 .blob-2 {
-    width: 110vw;
-    height: 80vw;
+    width: 140vw;
+    height: 100vw;
     background: var(--lego-yellow);
-    bottom: -30%;
-    right: -10%;
-    animation: moveWide 35s infinite alternate ease-in-out;
+    bottom: -40%;
+    right: -20%;
+    animation: moveWide 50s infinite alternate ease-in-out;
 }
 
 .blob-3 {
-    width: 70vw;
-    height: 100vw;
+    width: 90vw;
+    height: 130vw;
     background: var(--lego-blue);
     top: 20%;
-    left: 30%;
-    animation: moveTall 25s infinite alternate ease-in-out;
+    left: 40%;
+    animation: moveTall 40s infinite alternate ease-in-out;
 }
 
 @keyframes moveBig {
@@ -82,7 +92,7 @@ body {
     }
 
     100% {
-        transform: translate(20%, 10%) scale(1.2) rotate(90deg);
+        transform: translate(40vw, 20vh) scale(1.4) rotate(180deg);
     }
 }
 
@@ -92,7 +102,7 @@ body {
     }
 
     100% {
-        transform: translate(-30%, -15%) scale(1.1) rotate(-60deg);
+        transform: translate(-50vw, -20vh) scale(1.2) rotate(-120deg);
     }
 }
 
@@ -102,7 +112,7 @@ body {
     }
 
     100% {
-        transform: translate(10%, 20%) scale(1.3) rotate(45deg);
+        transform: translate(-10vw, 30vh) scale(1.5) rotate(90deg);
     }
 }
 
@@ -128,6 +138,7 @@ body {
     margin-left: -10px;
     margin-top: 0;
     filter: drop-shadow(4px 4px 0px rgba(0, 0, 0, 0.2));
+    transform: rotate(30deg);
     /* The 30deg tilt will be added in JS to coexist with translate */
 }
 
@@ -237,13 +248,19 @@ main {
 }
 
 section {
-    min-height: calc(100vh - 80px);
+    height: 100vh;
+    width: 100%;
     display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.8s ease;
+    scroll-snap-align: start;
+    /* Align to snap */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
 }
 
 section.active {
@@ -305,27 +322,30 @@ h2 {
 }
 
 .character-list {
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* 3x2 grid */
     gap: 1.5rem;
-    margin: 2rem 0;
-    flex-wrap: wrap;
+    margin: 2rem auto;
+    max-width: 500px;
 }
 
 .char-opt {
+    background: white;
     padding: 1rem;
-    border: 4px solid var(--lego-black);
-    background: var(--lego-white);
+    border: 3px solid var(--lego-black);
     cursor: none;
     transition: all 0.2s;
-    font-weight: 700;
-    border-radius: 8px;
+    border-radius: 0;
+    /* LEGO Style */
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
     min-width: 110px;
+    box-shadow: 4px 4px 0px var(--lego-black);
 }
+
 
 .dex-num {
     font-size: 0.7rem;
