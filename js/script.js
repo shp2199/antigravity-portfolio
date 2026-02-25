@@ -120,23 +120,36 @@ function createDust(x, y) {
 const navLinks = document.querySelectorAll('nav ul li a');
 const sections = document.querySelectorAll('section');
 
+const colors = ['#ff3e3e', '#f9d71c', '#0076a3', '#fb923c', '#4ade80', '#c084fc', '#fda4af'];
+
 function updateActiveSection(targetId) {
     sections.forEach(section => {
         section.classList.remove('active');
         if (section.id === targetId) {
             section.classList.add('active');
 
-            // Randomize H2 color in the active section
+            // Randomize H2 color
             const h2 = section.querySelector('h2');
             if (h2) {
-                const colors = ['#ff3e3e', '#f9d71c', '#0076a3', '#fb923c', '#4ade80'];
                 h2.style.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            // Randomize Profile Name in About section
+            const profileName = section.querySelector('.profile-name');
+            if (profileName) {
+                let nameColor;
+                do {
+                    nameColor = colors[Math.floor(Math.random() * colors.length)];
+                } while (h2 && nameColor === h2.style.color);
+                profileName.style.background = nameColor;
             }
         }
     });
 
     navLinks.forEach(link => {
         link.classList.remove('active-nav');
+        // Randomize box color on each nav
+        link.style.background = colors[Math.floor(Math.random() * colors.length)];
         if (link.getAttribute('href').substring(1) === targetId) {
             link.classList.add('active-nav');
         }
@@ -152,18 +165,23 @@ navLinks.forEach(link => {
     });
 });
 
-// Handle initial hash or Home
 window.addEventListener('load', () => {
     const hash = window.location.hash.substring(1) || 'home';
     updateActiveSection(hash);
+    renderLeaderboard();
 });
 
-// --- Pokepi Crossy Mini-Game ---
+// --- Pokepi Deluxe Mini-Game ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const startBtn = document.getElementById('start-game');
 const selectionUI = document.getElementById('game-selection');
 const charOpts = document.querySelectorAll('.char-opt');
+const gameArea = document.getElementById('game-canvas-area');
+const scoreForm = document.getElementById('high-score-form');
+const saveScoreBtn = document.getElementById('save-score');
+const nicknameInput = document.getElementById('nickname');
+const scoreList = document.getElementById('score-list');
 
 let gameRunning = false;
 let player = { x: 235, y: 460, size: 30, color: '#f9d71c', char: 'bulbasaur' };
@@ -171,27 +189,98 @@ let enemies = [];
 let score = 0;
 let frameId;
 
-const charColors = {
-    bulbasaur: '#4ade80',
-    quaxly: '#60a5fa',
-    pikachu: '#fde047',
-    ditto: '#c084fc',
-    slowpoke: '#fda4af',
-    gengar: '#a78bfa'
+const charData = {
+    bulbasaur: { color: '#4ade80', dex: 'No.0001' },
+    quaxly: { color: '#60a5fa', dex: 'No.0912' },
+    pikachu: { color: '#fde047', dex: 'No.0025' },
+    ditto: { color: '#c084fc', dex: 'No.0132' },
+    slowpoke: { color: '#fda4af', dex: 'No.0079' },
+    gengar: { color: '#a78bfa', dex: 'No.0094' }
 };
 
 charOpts.forEach(opt => {
+    const charType = opt.dataset.char;
+    const preview = opt.querySelector('.char-preview');
+    preview.style.backgroundColor = charData[charType].color;
+    preview.style.borderRadius = '50%';
+
     opt.addEventListener('click', () => {
         charOpts.forEach(o => o.classList.remove('active'));
         opt.classList.add('active');
-        player.char = opt.dataset.char;
-        player.color = charColors[player.char];
+        player.char = charType;
+        player.color = charData[charType].color;
     });
 });
 
+function drawPokemon(type, x, y, size) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#000';
+
+    if (type === 'bulbasaur') {
+        ctx.fillStyle = '#4ade80';
+        ctx.fillRect(0, 10, size, size - 10);
+        ctx.fillStyle = '#166534';
+        ctx.fillRect(size * 0.2, 0, size * 0.6, 10);
+        ctx.fillStyle = '#4ade80';
+        // Ears
+        ctx.beginPath(); ctx.moveTo(0, 10); ctx.lineTo(5, 0); ctx.lineTo(10, 10); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(size - 10, 10); ctx.lineTo(size - 5, 0); ctx.lineTo(size, 10); ctx.fill(); ctx.stroke();
+    } else if (type === 'pikachu') {
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(0, 10, size, size - 10);
+        // Ears
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(0, -10, 8, 20);
+        ctx.fillRect(size - 8, -10, 8, 20);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, -10, 8, 5);
+        ctx.fillRect(size - 8, -10, 8, 5);
+    } else if (type === 'quaxly') {
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 10, size, size - 10);
+        ctx.fillStyle = '#60a5fa';
+        ctx.beginPath(); ctx.arc(size / 2, 10, size / 2, Math.PI, 0); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24'; // Beak
+        ctx.fillRect(size / 2 - 5, size * 0.5, 10, 5);
+    } else if (type === 'slowpoke') {
+        ctx.fillStyle = '#fda4af';
+        ctx.fillRect(0, 10, size, size - 10);
+        // Small ears
+        ctx.beginPath(); ctx.arc(5, 10, 5, Math.PI, 0); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(size - 5, 10, 5, Math.PI, 0); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; // Muzzle
+        ctx.fillRect(size * 0.2, size * 0.6, size * 0.6, 10);
+    } else if (type === 'gengar') {
+        ctx.fillStyle = '#a78bfa';
+        ctx.beginPath();
+        ctx.moveTo(0, 10); ctx.lineTo(size * 0.2, 0); ctx.lineTo(size * 0.4, 10);
+        ctx.lineTo(size * 0.6, 10); ctx.lineTo(size * 0.8, 0); ctx.lineTo(size, 10);
+        ctx.lineTo(size, size); ctx.lineTo(0, size); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+    } else { // Ditto
+        ctx.fillStyle = '#c084fc';
+        ctx.beginPath();
+        ctx.ellipse(size / 2, size / 2, size / 2, size / 2.5, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+    }
+
+    // Ditto Face for all
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(size * 0.3, size * 0.5, 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(size * 0.7, size * 0.5, 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(size * 0.35, size * 0.7);
+    ctx.quadraticCurveTo(size / 2, size * 0.8, size * 0.65, size * 0.7);
+    ctx.stroke();
+
+    ctx.restore();
+}
+
 startBtn.addEventListener('click', () => {
     selectionUI.style.display = 'none';
-    canvas.style.display = 'block';
+    gameArea.style.display = 'block';
     resetGame();
     gameRunning = true;
     gameLoop();
@@ -202,32 +291,25 @@ function resetGame() {
     player.y = 460;
     enemies = [];
     score = 0;
-    for (let i = 0; i < 6; i++) {
-        spawnEnemy(i * 60 + 50);
+    for (let i = 0; i < 7; i++) {
+        spawnEnemy(i * 60 + 40);
     }
 }
 
 function spawnEnemy(y) {
     const speed = (Math.random() * 2 + 1) * (Math.random() > 0.5 ? 1 : -1);
-    enemies.push({ x: Math.random() * 450, y: y, w: 40 + Math.random() * 40, h: 30, speed: speed });
-}
-
-function drawPlayer() {
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.size, player.size);
-    // Ditto Face
-    ctx.fillStyle = '#000';
-    ctx.fillRect(player.x + 8, player.y + 10, 2, 2);
-    ctx.fillRect(player.x + 20, player.y + 10, 2, 2);
-    ctx.beginPath();
-    ctx.arc(player.x + 15, player.y + 20, 5, 0, Math.PI);
-    ctx.stroke();
+    enemies.push({ x: Math.random() * 450, y: y, w: 60 + Math.random() * 60, h: 35, speed: speed });
 }
 
 function drawEnemies() {
-    ctx.fillStyle = '#ff3e3e';
     enemies.forEach(en => {
+        ctx.fillStyle = '#334155';
         ctx.fillRect(en.x, en.y, en.w, en.h);
+        ctx.strokeStyle = '#fff';
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(en.x + 2, en.y + en.h / 2, en.w - 4, 1);
+        ctx.setLineDash([]);
+
         en.x += en.speed;
         if (en.x > 500) en.x = -en.w;
         if (en.x < -en.w) en.x = 500;
@@ -243,42 +325,97 @@ function drawEnemies() {
 function gameOver() {
     gameRunning = false;
     cancelAnimationFrame(frameId);
-    alert(`Game Over! Score: ${score}`);
+    if (isHighScore(score)) {
+        scoreForm.style.display = 'block';
+    } else {
+        alert(`GAME OVER! Final Score: ${score}`);
+        exitGame();
+    }
+}
+
+function exitGame() {
+    gameArea.style.display = 'none';
     selectionUI.style.display = 'block';
-    canvas.style.display = 'none';
+    scoreForm.style.display = 'none';
+    renderLeaderboard();
 }
 
 function gameLoop() {
     if (!gameRunning) return;
     ctx.clearRect(0, 0, 500, 500);
 
-    // Draw Grass Lines
-    ctx.strokeStyle = 'rgba(0,0,0,0.05)';
-    for (let i = 0; i < 500; i += 50) {
-        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(500, i); ctx.stroke();
+    // Draw Background
+    for (let i = 0; i < 500; i += 60) {
+        ctx.fillStyle = i === 0 || i >= 420 ? '#c6e3b8' : '#64748b'; // Grass or Road
+        ctx.fillRect(0, i, 500, 60);
+        if (i > 0 && i < 420) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(500, i); ctx.stroke();
+        }
     }
 
     drawEnemies();
-    drawPlayer();
+    drawPokemon(player.char, player.x, player.y, player.size);
 
-    // Score
     ctx.fillStyle = '#000';
-    ctx.font = '20px Outfit';
-    ctx.fillText(`Score: ${score}`, 10, 30);
+    ctx.font = 'bold 24px Outfit';
+    ctx.fillText(`SCORE: ${score}`, 20, 40);
 
     frameId = requestAnimationFrame(gameLoop);
 }
 
 document.addEventListener('keydown', (e) => {
     if (!gameRunning) return;
-    if (e.key === 'ArrowUp') { player.y -= 30; score++; }
-    if (e.key === 'ArrowDown') player.y += 30;
-    if (e.key === 'ArrowLeft') player.x -= 30;
-    if (e.key === 'ArrowRight') player.x += 30;
+    const move = 30;
+    if (['ArrowUp', 'w', 'W'].includes(e.key)) { player.y -= move; score++; }
+    if (['ArrowDown', 's', 'S'].includes(e.key)) player.y += move;
+    if (['ArrowLeft', 'a', 'A'].includes(e.key)) player.x -= move;
+    if (['ArrowRight', 'd', 'D'].includes(e.key)) player.x += move;
+
+    player.x = Math.max(0, Math.min(500 - player.size, player.x));
+    player.y = Math.max(-player.size, Math.min(460, player.y));
 
     if (player.y < 0) {
         player.y = 460;
-        score += 10; // Bonus for reaching the top
+        score += 50;
     }
 });
+
+// --- Leaderboard Logic ---
+function getScores() {
+    const s = localStorage.getItem('pokepia_v2_scores');
+    return s ? JSON.parse(s) : [];
+}
+
+function isHighScore(s) {
+    if (s === 0) return false;
+    const scores = getScores();
+    return scores.length < 10 || s > scores[scores.length - 1].score;
+}
+
+function saveScore(name, s) {
+    let scores = getScores();
+    scores.push({ name, score: s });
+    scores.sort((a, b) => b.score - a.score);
+    scores = scores.slice(0, 10);
+    localStorage.setItem('pokepia_v2_scores', JSON.stringify(scores));
+}
+
+function renderLeaderboard() {
+    const scores = getScores();
+    scoreList.innerHTML = scores.map((s, i) => `
+        <li>
+            <span>#${i + 1} ${s.name}</span>
+            <span>${s.score}</span>
+        </li>
+    `).join('') || '<li>No ranking yet</li>';
+}
+
+saveScoreBtn.addEventListener('click', () => {
+    const name = nicknameInput.value.trim() || 'NoName';
+    saveScore(name, score);
+    nicknameInput.value = '';
+    exitGame();
+});
+
 

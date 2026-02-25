@@ -72,22 +72,62 @@
 
         <section id="game">
             <div class="glass-section game-container">
-                <h2>POKEPIA CROSSY</h2>
+                <h2>POKEPIA DELUXE</h2>
                 <div id="game-selection">
                     <h3>Select Your Character</h3>
                     <div class="character-list">
-                        <div class="char-opt active" data-char="bulbasaur">Bulbasaur</div>
-                        <div class="char-opt" data-char="quaxly">Quaxly</div>
-                        <div class="char-opt" data-char="pikachu">Pikachu</div>
-                        <div class="char-opt" data-char="ditto">Ditto</div>
-                        <div class="char-opt" data-char="slowpoke">Slowpoke</div>
-                        <div class="char-opt" data-char="gengar">Gengar</div>
+                        <div class="char-opt active" data-char="bulbasaur">
+                            <span class="dex-num">No.0001</span>
+                            <div class="char-preview bulbasaur"></div>
+                            <span class="char-name">Bulbasaur</span>
+                        </div>
+                        <div class="char-opt" data-char="quaxly">
+                            <span class="dex-num">No.0912</span>
+                            <div class="char-preview quaxly"></div>
+                            <span class="char-name">Quaxly</span>
+                        </div>
+                        <div class="char-opt" data-char="pikachu">
+                            <span class="dex-num">No.0025</span>
+                            <div class="char-preview pikachu"></div>
+                            <span class="char-name">Pikachu</span>
+                        </div>
+                        <div class="char-opt" data-char="ditto">
+                            <span class="dex-num">No.0132</span>
+                            <div class="char-preview ditto"></div>
+                            <span class="char-name">Ditto</span>
+                        </div>
+                        <div class="char-opt" data-char="slowpoke">
+                            <span class="dex-num">No.0079</span>
+                            <div class="char-preview slowpoke"></div>
+                            <span class="char-name">Slowpoke</span>
+                        </div>
+                        <div class="char-opt" data-char="gengar">
+                            <span class="dex-num">No.0094</span>
+                            <div class="char-preview gengar"></div>
+                            <span class="char-name">Gengar</span>
+                        </div>
                     </div>
                     <button id="start-game">START GAME</button>
+
+                    <div id="leaderboard">
+                        <h4>TOP 10 RANKING</h4>
+                        <ul id="score-list">
+                            <!-- Scores populated by JS -->
+                        </ul>
+                    </div>
                 </div>
-                <canvas id="gameCanvas" width="500" height="500" style="display:none;"></canvas>
+
+                <div id="game-canvas-area" style="display:none;">
+                    <canvas id="gameCanvas" width="500" height="500"></canvas>
+                    <div id="high-score-form" style="display:none;">
+                        <h3>NEW HIGH SCORE!</h3>
+                        <input type="text" id="nickname" placeholder="Enter Nickname" maxlength="10">
+                        <button id="save-score">SAVE</button>
+                    </div>
+                </div>
             </div>
         </section>
+
     </main>
 
 

@@ -150,63 +150,58 @@ header {
     width: 100%;
     padding: 1.5rem 5%;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
-    border-bottom: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
 }
 
 nav {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
 }
 
-/* Navigation & Active State */
-nav ul li a.active-nav::after {
-    width: 100%;
-}
-
-nav ul li a.active-nav {
-    color: var(--lego-red);
-    font-weight: 700;
-}
-
 nav ul {
     display: flex;
     list-style: none;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 nav ul li a {
     text-decoration: none;
+    font-weight: 700;
     color: var(--lego-black);
-    font-weight: 400;
-    font-size: 1rem;
-    text-transform: uppercase;
-    transition: color 0.3s;
-    position: relative;
+    padding: 0.8rem 1.5rem;
+    background: var(--lego-white);
+    border: 3px solid var(--lego-black);
+    display: block;
+    transition: all 0.2s;
+    font-size: 1.1rem;
+    box-shadow: 4px 4px 0px var(--lego-black);
+}
+
+/* Base tilt for all nav items */
+nav ul li:nth-child(odd) a {
+    transform: rotate(-2deg);
+}
+
+nav ul li:nth-child(even) a {
+    transform: rotate(3deg);
 }
 
 nav ul li a:hover {
-    color: var(--lego-red);
+    transform: translateY(-5px) scale(1.05) !important;
+    box-shadow: 6px 6px 0px var(--lego-black);
 }
 
-nav ul li a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -5px;
-    left: 0;
-    background-color: var(--lego-red);
-    transition: width 0.3s;
+/* Active State */
+nav ul li a.active-nav {
+    transform: translateY(-3px) scale(1.1) !important;
+    box-shadow: 2px 2px 0px var(--lego-black);
+    z-index: 2;
 }
 
-nav ul li a:hover::after {
-    width: 100%;
-}
 
 /* Sections */
 main {
@@ -290,49 +285,93 @@ h2 {
 }
 
 .char-opt {
-    padding: 0.8rem 1.2rem;
-    border: 3px solid var(--lego-black);
+    padding: 1rem;
+    border: 4px solid var(--lego-black);
     background: var(--lego-white);
     cursor: none;
     transition: all 0.2s;
     font-weight: 700;
-    border-radius: 4px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 110px;
+}
+
+.dex-num {
+    font-size: 0.7rem;
+    color: #666;
+    letter-spacing: 1px;
+}
+
+.char-preview {
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
 }
 
 .char-opt:hover,
 .char-opt.active {
-    background: var(--lego-yellow);
-    transform: translateY(-5px);
-    box-shadow: 4px 4px 0px var(--lego-black);
+    transform: translateY(-8px);
+    box-shadow: 6px 6px 0px var(--lego-black);
 }
 
-#start-game {
-    padding: 1rem 3rem;
-    background: var(--lego-red);
-    border: 4px solid var(--lego-black);
-    color: white;
-    font-size: 1.5rem;
+#leaderboard {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 1rem;
+}
+
+#score-list {
+    list-style: none;
+    margin-top: 1rem;
+    text-align: left;
+    max-width: 300px;
+    margin: 1rem auto;
+}
+
+#score-list li {
+    padding: 0.8rem;
+    border-bottom: 3px solid var(--lego-black);
+    display: flex;
+    justify-content: space-between;
     font-weight: 700;
-    cursor: none;
-    box-shadow: 8px 8px 0px var(--lego-black);
-    transition: all 0.2s;
-    border-radius: 8px;
+    background: white;
+    margin-bottom: 0.5rem;
 }
 
-#start-game:active {
-    transform: translate(4px, 4px);
-    box-shadow: 4px 4px 0px var(--lego-black);
+#game-canvas-area {
+    margin-top: 2rem;
 }
 
-#gameCanvas {
-    background: #c6e3b8;
-    /* Grass color */
+#high-score-form {
+    background: var(--lego-yellow);
+    padding: 2rem;
     border: 5px solid var(--lego-black);
-    margin: 2rem auto;
-    display: block;
-    box-shadow: 12px 12px 0px var(--lego-black);
-    max-width: 100%;
+    box-shadow: 10px 10px 0px var(--lego-black);
+    margin-top: 2rem;
 }
+
+#nickname {
+    padding: 1rem;
+    font-size: 1.5rem;
+    border: 4px solid var(--lego-black);
+    margin: 1rem 0;
+    width: 80%;
+    font-weight: 700;
+}
+
+#save-score {
+    padding: 1rem 2rem;
+    background: var(--lego-red);
+    color: white;
+    font-weight: 700;
+    border: 4px solid var(--lego-black);
+    cursor: none;
+}
+
 
 
 /* Existing LEGO Card Overrides */
