@@ -35,59 +35,77 @@ body {
     width: 100vw;
     height: 100vh;
     z-index: -2;
-    filter: blur(40px);
+    filter: blur(80px);
+    /* Increased blur */
     opacity: 0.6;
+    overflow: hidden;
 }
 
 .blob {
     position: absolute;
-    width: 40vw;
-    height: 40vw;
     border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
-    animation: bounceAround 30s infinite alternate ease-in-out;
+    mix-blend-mode: screen;
+    /* Color blending */
+    opacity: 0.45;
 }
 
 .blob-1 {
+    width: 90vw;
+    height: 90vw;
     background: var(--lego-red);
-    top: 10%;
-    left: 10%;
+    top: -20%;
+    left: -20%;
+    animation: moveBig 30s infinite alternate ease-in-out;
 }
 
 .blob-2 {
+    width: 110vw;
+    height: 80vw;
     background: var(--lego-yellow);
-    bottom: 10%;
-    right: 10%;
-    animation-delay: -7s;
+    bottom: -30%;
+    right: -10%;
+    animation: moveWide 35s infinite alternate ease-in-out;
 }
 
 .blob-3 {
+    width: 70vw;
+    height: 100vw;
     background: var(--lego-blue);
-    top: 50%;
+    top: 20%;
     left: 30%;
-    animation-duration: 40s;
+    animation: moveTall 25s infinite alternate ease-in-out;
 }
 
-@keyframes bounceAround {
+@keyframes moveBig {
     0% {
         transform: translate(0, 0) scale(1) rotate(0deg);
     }
 
-    25% {
-        transform: translate(50vw, 20vh) scale(1.2) rotate(90deg);
+    100% {
+        transform: translate(20%, 10%) scale(1.2) rotate(90deg);
     }
+}
 
-    50% {
-        transform: translate(20vw, 70vh) scale(0.9) rotate(180deg);
-    }
-
-    75% {
-        transform: translate(-30vw, 40vh) scale(1.1) rotate(270deg);
+@keyframes moveWide {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
     }
 
     100% {
-        transform: translate(10vw, -10vh) scale(1) rotate(360deg);
+        transform: translate(-30%, -15%) scale(1.1) rotate(-60deg);
     }
 }
+
+@keyframes moveTall {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(10%, 20%) scale(1.3) rotate(45deg);
+    }
+}
+
 
 /* Custom Cursor (Triangle) */
 .cursor-outer,
@@ -106,11 +124,13 @@ body {
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
     border-bottom: 25px solid var(--lego-black);
-    transform-origin: top center;
+    transform-origin: center center;
     margin-left: -10px;
     margin-top: 0;
     filter: drop-shadow(4px 4px 0px rgba(0, 0, 0, 0.2));
+    /* The 30deg tilt will be added in JS to coexist with translate */
 }
+
 
 .cursor-inner {
     width: 0;
@@ -173,14 +193,16 @@ nav ul li a {
     font-weight: 700 !important;
     color: var(--lego-black) !important;
     padding: 0.8rem 1.5rem !important;
-    background: var(--lego-white) !important;
+    background: #eee;
+    /* Light gray base, will be overriden by JS rand color */
     border: 3px solid var(--lego-black) !important;
     display: block !important;
-    transition: all 0.2s;
+    transition: transform 0.2s, background-color 0.3s, box-shadow 0.2s;
     font-size: 1.1rem !important;
     box-shadow: 4px 4px 0px var(--lego-black) !important;
     text-transform: none !important;
 }
+
 
 
 /* Base tilt for all nav items */
@@ -200,9 +222,13 @@ nav ul li a:hover {
 /* Active State */
 nav ul li a.active-nav {
     transform: translateY(-3px) scale(1.1) !important;
-    box-shadow: 2px 2px 0px var(--lego-black);
+    box-shadow: 2px 2px 0px var(--lego-black) !important;
+    background: var(--lego-white) !important;
+    /* Stand out! */
+    color: var(--lego-black) !important;
     z-index: 2;
 }
+
 
 
 /* Sections */
@@ -348,31 +374,44 @@ h2 {
     margin-top: 2rem;
 }
 
-#high-score-form {
-    background: var(--lego-yellow);
-    padding: 2rem;
-    border: 5px solid var(--lego-black);
-    box-shadow: 10px 10px 0px var(--lego-black);
-    margin-top: 2rem;
-}
-
-#nickname {
-    padding: 1rem;
-    font-size: 1.5rem;
-    border: 4px solid var(--lego-black);
-    margin: 1rem 0;
-    width: 80%;
-    font-weight: 700;
-}
-
-#save-score {
-    padding: 1rem 2rem;
+#start-game {
+    padding: 1.2rem 4rem;
     background: var(--lego-red);
+    border: 5px solid var(--lego-black);
     color: white;
+    font-size: 1.8rem;
     font-weight: 700;
-    border: 4px solid var(--lego-black);
     cursor: none;
+    box-shadow: 10px 10px 0px var(--lego-black);
+    transition: all 0.2s;
+    border-radius: 0;
+    /* Boxy aesthetic */
+    margin-top: 2rem;
+    transform: perspective(500px) rotateX(10deg);
 }
+
+#start-game:hover {
+    transform: perspective(500px) rotateX(0deg) translateY(-5px);
+    background: var(--lego-yellow);
+    color: var(--lego-black);
+    box-shadow: 12px 12px 0px var(--lego-black);
+}
+
+#start-game:active {
+    transform: translate(4px, 4px);
+    box-shadow: 4px 4px 0px var(--lego-black);
+}
+
+#leaderboard {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 3px dashed var(--lego-black);
+    border-radius: 1rem;
+    display: none;
+    /* Hidden by default */
+}
+
 
 
 

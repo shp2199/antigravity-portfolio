@@ -78,8 +78,10 @@ document.addEventListener('mousemove', (e) => {
     const y = e.clientY;
 
     // Cursor movement (aligned with triangle tip)
-    cursorOuter.style.transform = `translate(${x}px, ${y}px)`;
-    cursorInner.style.transform = `translate(${x}px, ${y}px)`;
+    // Add -30deg tilt as requested
+    cursorOuter.style.transform = `translate(${x}px, ${y}px) rotate(-30deg)`;
+    cursorInner.style.transform = `translate(${x}px, ${y}px) rotate(-30deg)`;
+
 
     // Create Fairy Dust (Particles)
     createDust(x, y);
@@ -123,6 +125,9 @@ const sections = document.querySelectorAll('section');
 const colors = ['#ff3e3e', '#f9d71c', '#0076a3', '#fb923c', '#4ade80', '#c084fc', '#fda4af'];
 
 function updateActiveSection(targetId) {
+    const activeColors = [...colors];
+    let usedH2Color = null;
+
     sections.forEach(section => {
         section.classList.remove('active');
         if (section.id === targetId) {
@@ -131,16 +136,18 @@ function updateActiveSection(targetId) {
             // Randomize H2 color
             const h2 = section.querySelector('h2');
             if (h2) {
-                h2.style.color = colors[Math.floor(Math.random() * colors.length)];
+                usedH2Color = activeColors[Math.floor(Math.random() * activeColors.length)];
+                h2.style.color = usedH2Color;
             }
 
             // Randomize Profile Name in About section
             const profileName = section.querySelector('.profile-name');
             if (profileName) {
                 let nameColor;
-                do {
-                    nameColor = colors[Math.floor(Math.random() * colors.length)];
-                } while (h2 && nameColor === h2.style.color);
+                // Ensure name tag color is distinct from H2
+                // Filter colors to remove similar ones if possible, but at least not the same
+                const distinctColors = activeColors.filter(c => c !== usedH2Color);
+                nameColor = distinctColors[Math.floor(Math.random() * distinctColors.length)];
                 profileName.style.background = nameColor;
             }
         }
@@ -148,13 +155,18 @@ function updateActiveSection(targetId) {
 
     navLinks.forEach(link => {
         link.classList.remove('active-nav');
-        // Randomize box color on each nav
-        link.style.background = colors[Math.floor(Math.random() * colors.length)];
-        if (link.getAttribute('href').substring(1) === targetId) {
+        const isCurrentlyActive = link.getAttribute('href').substring(1) === targetId;
+
+        if (isCurrentlyActive) {
             link.classList.add('active-nav');
+            link.style.background = '#ffffff'; // White background for active as requested
+        } else {
+            // Randomize box color for inactive ones
+            link.style.background = activeColors[Math.floor(Math.random() * activeColors.length)];
         }
     });
 }
+
 
 navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
@@ -187,7 +199,11 @@ let gameRunning = false;
 let player = { x: 235, y: 460, size: 30, color: '#f9d71c', char: 'bulbasaur' };
 let enemies = [];
 let score = 0;
+let stage = 0;
+let stageColor = '#c6e3b8'; // Initial grass color
+const stageColors = ['#c6e3b8', '#b8e3d5', '#e3d5b8', '#d5b8e3', '#e3b8b8'];
 let frameId;
+
 
 const charData = {
     bulbasaur: { color: '#4ade80', dex: 'No.0001' },
@@ -200,9 +216,20 @@ const charData = {
 
 charOpts.forEach(opt => {
     const charType = opt.dataset.char;
-    const preview = opt.querySelector('.char-preview');
-    preview.style.backgroundColor = charData[charType].color;
-    preview.style.borderRadius = '50%';
+    const previewCanvas = opt.querySelector('canvas');
+    if (previewCanvas) {
+        const pctx = previewCanvas.getContext('2d');
+        // Helper to draw previews
+        function drawPreview(type) {
+            pctx.clearRect(0, 0, 40, 40);
+            // Save global ctx to restore later
+            const originalCtx = ctx;
+            // Temporarily swap ctx to preview ctx for drawPokemon
+            window.ctx = pctx;
+            // drawPokemon uses global ctx, but it's risky. Let's make drawPokemon take ctx.
+            // I'll update drawPokemon below.
+        }
+    }
 
     opt.addEventListener('click', () => {
         charOpts.forEach(o => o.classList.remove('active'));
@@ -212,71 +239,86 @@ charOpts.forEach(opt => {
     });
 });
 
-function drawPokemon(type, x, y, size) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#000';
+// Character Preview Initializer
+function initCharacterPreviews() {
+    charOpts.forEach(opt => {
+        const charType = opt.dataset.char;
+        const canvas = opt.querySelector('canvas');
+        if (canvas) {
+            const pctx = canvas.getContext('2d');
+            drawPokemon(charType, 5, 5, 30, pctx); // Pass canvas context
+        }
+    });
+}
+window.addEventListener('load', initCharacterPreviews);
+
+
+function drawPokemon(type, x, y, size, targetCtx = ctx) {
+    targetCtx.save();
+    targetCtx.translate(x, y);
+    targetCtx.lineWidth = 2;
+    targetCtx.strokeStyle = '#000';
 
     if (type === 'bulbasaur') {
-        ctx.fillStyle = '#4ade80';
-        ctx.fillRect(0, 10, size, size - 10);
-        ctx.fillStyle = '#166534';
-        ctx.fillRect(size * 0.2, 0, size * 0.6, 10);
-        ctx.fillStyle = '#4ade80';
+        targetCtx.fillStyle = '#4ade80';
+        targetCtx.fillRect(0, 10, size, size - 10);
+        targetCtx.fillStyle = '#166534';
+        targetCtx.fillRect(size * 0.2, 0, size * 0.6, 10);
+        targetCtx.fillStyle = '#4ade80';
         // Ears
-        ctx.beginPath(); ctx.moveTo(0, 10); ctx.lineTo(5, 0); ctx.lineTo(10, 10); ctx.fill(); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(size - 10, 10); ctx.lineTo(size - 5, 0); ctx.lineTo(size, 10); ctx.fill(); ctx.stroke();
+        targetCtx.beginPath(); targetCtx.moveTo(0, 10); targetCtx.lineTo(5, 0); targetCtx.lineTo(10, 10); targetCtx.fill(); targetCtx.stroke();
+        targetCtx.beginPath(); targetCtx.moveTo(size - 10, 10); targetCtx.lineTo(size - 5, 0); targetCtx.lineTo(size, 10); targetCtx.fill(); targetCtx.stroke();
     } else if (type === 'pikachu') {
-        ctx.fillStyle = '#fde047';
-        ctx.fillRect(0, 10, size, size - 10);
+        targetCtx.fillStyle = '#fde047';
+        targetCtx.fillRect(0, 10, size, size - 10);
         // Ears
-        ctx.fillStyle = '#fde047';
-        ctx.fillRect(0, -10, 8, 20);
-        ctx.fillRect(size - 8, -10, 8, 20);
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, -10, 8, 5);
-        ctx.fillRect(size - 8, -10, 8, 5);
+        targetCtx.fillStyle = '#fde047';
+        targetCtx.fillRect(0, -10, 8, 20);
+        targetCtx.fillRect(size - 8, -10, 8, 20);
+        targetCtx.fillStyle = '#000';
+        targetCtx.fillRect(0, -10, 8, 5);
+        targetCtx.fillRect(size - 8, -10, 8, 5);
     } else if (type === 'quaxly') {
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 10, size, size - 10);
-        ctx.fillStyle = '#60a5fa';
-        ctx.beginPath(); ctx.arc(size / 2, 10, size / 2, Math.PI, 0); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#fbbf24'; // Beak
-        ctx.fillRect(size / 2 - 5, size * 0.5, 10, 5);
+        targetCtx.fillStyle = '#fff';
+        targetCtx.fillRect(0, 10, size, size - 10);
+        targetCtx.fillStyle = '#60a5fa';
+        targetCtx.beginPath(); targetCtx.arc(size / 2, 10, size / 2, Math.PI, 0); targetCtx.fill(); targetCtx.stroke();
+        targetCtx.fillStyle = '#fbbf24'; // Beak
+        targetCtx.fillRect(size / 2 - 5, size * 0.5, 10, 5);
     } else if (type === 'slowpoke') {
-        ctx.fillStyle = '#fda4af';
-        ctx.fillRect(0, 10, size, size - 10);
+        targetCtx.fillStyle = '#fda4af';
+        targetCtx.fillRect(0, 10, size, size - 10);
         // Small ears
-        ctx.beginPath(); ctx.arc(5, 10, 5, Math.PI, 0); ctx.fill(); ctx.stroke();
-        ctx.beginPath(); ctx.arc(size - 5, 10, 5, Math.PI, 0); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#fff'; // Muzzle
-        ctx.fillRect(size * 0.2, size * 0.6, size * 0.6, 10);
+        targetCtx.beginPath(); targetCtx.arc(5, 10, 5, Math.PI, 0); targetCtx.fill(); targetCtx.stroke();
+        targetCtx.beginPath(); targetCtx.arc(size - 5, 10, 5, Math.PI, 0); targetCtx.fill(); targetCtx.stroke();
+        targetCtx.fillStyle = '#fff'; // Muzzle
+        targetCtx.fillRect(size * 0.2, size * 0.6, size * 0.6, 10);
     } else if (type === 'gengar') {
-        ctx.fillStyle = '#a78bfa';
-        ctx.beginPath();
-        ctx.moveTo(0, 10); ctx.lineTo(size * 0.2, 0); ctx.lineTo(size * 0.4, 10);
-        ctx.lineTo(size * 0.6, 10); ctx.lineTo(size * 0.8, 0); ctx.lineTo(size, 10);
-        ctx.lineTo(size, size); ctx.lineTo(0, size); ctx.closePath();
-        ctx.fill(); ctx.stroke();
+        targetCtx.fillStyle = '#a78bfa';
+        targetCtx.beginPath();
+        targetCtx.moveTo(0, 10); targetCtx.lineTo(size * 0.2, 0); targetCtx.lineTo(size * 0.4, 10);
+        targetCtx.lineTo(size * 0.6, 10); targetCtx.lineTo(size * 0.8, 0); targetCtx.lineTo(size, 10);
+        targetCtx.lineTo(size, size); targetCtx.lineTo(0, size); targetCtx.closePath();
+        targetCtx.fill(); targetCtx.stroke();
     } else { // Ditto
-        ctx.fillStyle = '#c084fc';
-        ctx.beginPath();
-        ctx.ellipse(size / 2, size / 2, size / 2, size / 2.5, 0, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
+        targetCtx.fillStyle = '#c084fc';
+        targetCtx.beginPath();
+        targetCtx.ellipse(size / 2, size / 2, size / 2, size / 2.5, 0, 0, Math.PI * 2);
+        targetCtx.fill(); targetCtx.stroke();
     }
 
     // Ditto Face for all
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(size * 0.3, size * 0.5, 1.5, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(size * 0.7, size * 0.5, 1.5, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(size * 0.35, size * 0.7);
-    ctx.quadraticCurveTo(size / 2, size * 0.8, size * 0.65, size * 0.7);
-    ctx.stroke();
+    targetCtx.fillStyle = '#000';
+    targetCtx.beginPath(); targetCtx.arc(size * 0.3, size * 0.5, 1.5, 0, Math.PI * 2); targetCtx.fill();
+    targetCtx.beginPath(); targetCtx.arc(size * 0.7, size * 0.5, 1.5, 0, Math.PI * 2); targetCtx.fill();
+    targetCtx.beginPath();
+    targetCtx.moveTo(size * 0.35, size * 0.7);
+    targetCtx.quadraticCurveTo(size / 2, size * 0.8, size * 0.65, size * 0.7);
+    targetCtx.stroke();
 
-    ctx.restore();
+    targetCtx.restore();
 }
+
 
 startBtn.addEventListener('click', () => {
     selectionUI.style.display = 'none';
@@ -295,20 +337,35 @@ function resetGame() {
     player.y = 460;
     enemies = [];
     score = 0;
+    stage = 0;
+    stageColor = stageColors[0];
     for (let i = 0; i < 7; i++) {
-        spawnEnemy(i * 60 + 40);
+        spawnEnemy(i * 60 + 40, i);
     }
 }
 
-function spawnEnemy(y) {
-    const speed = (Math.random() * 2 + 1) * (Math.random() > 0.5 ? 1 : -1);
-    enemies.push({ x: Math.random() * 450, y: y, w: 60 + Math.random() * 60, h: 35, speed: speed });
+
+function spawnEnemy(y, laneIndex) {
+    const speed = (Math.random() * 2 + 1 + stage * 0.2) * (Math.random() > 0.5 ? 1 : -1);
+    const laneColors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4'];
+    enemies.push({
+        x: Math.random() * 450,
+        y: y,
+        w: 60 + Math.random() * 60,
+        h: 35,
+        speed: speed,
+        color: laneColors[laneIndex % laneColors.length]
+    });
 }
+
 
 function drawEnemies() {
     enemies.forEach(en => {
-        ctx.fillStyle = '#334155';
+        ctx.fillStyle = en.color; // Use lane-specific color
         ctx.fillRect(en.x, en.y, en.w, en.h);
+        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+        ctx.strokeRect(en.x, en.y, en.w, en.h);
+
         ctx.strokeStyle = '#fff';
         ctx.setLineDash([5, 5]);
         ctx.strokeRect(en.x + 2, en.y + en.h / 2, en.w - 4, 1);
@@ -350,13 +407,14 @@ function gameLoop() {
 
     // Draw Background
     for (let i = 0; i < 500; i += 60) {
-        ctx.fillStyle = i === 0 || i >= 420 ? '#c6e3b8' : '#64748b'; // Grass or Road
+        ctx.fillStyle = i === 0 || i >= 420 ? stageColor : '#64748b'; // Stage color for grass
         ctx.fillRect(0, i, 500, 60);
         if (i > 0 && i < 420) {
             ctx.strokeStyle = 'rgba(255,255,255,0.2)';
             ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(500, i); ctx.stroke();
         }
     }
+
 
     drawEnemies();
     drawPokemon(player.char, player.x, player.y, player.size);
@@ -382,7 +440,12 @@ document.addEventListener('keydown', (e) => {
     if (player.y < 0) {
         player.y = 460;
         score += 50;
+        stage++;
+        stageColor = stageColors[stage % stageColors.length];
+        // Speed up enemies slightly on each stage
+        enemies.forEach(en => en.speed *= 1.1);
     }
+
 });
 
 // --- Leaderboard Logic ---
