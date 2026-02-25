@@ -22,13 +22,13 @@
 
     <header>
         <nav>
-            <div class="logo">PARK SOOHO</div>
             <ul>
-                <li><a href="#home">Home</a></li>
+                <li><a href="#home" class="active-nav">Home</a></li>
                 <li><a href="#about">About Me</a></li>
                 <li><a href="#skills">Skills</a></li>
                 <li><a href="#highlights">Highlights</a></li>
                 <li><a href="#projects">Projects</a></li>
+                <li><a href="#game">...</a></li>
             </ul>
         </nav>
     </header>
@@ -36,13 +36,14 @@
     <main>
         <section id="home" class="active">
             <div class="container">
-                <h1>Hello World</h1>
+                <h1>안녕 세상아</h1>
                 <p>Click to explore greetings!</p>
             </div>
         </section>
 
         <section id="about">
             <div class="glass-section">
+                <div class="profile-name">PARK SOOHO</div>
                 <h2>About Me</h2>
                 <div class="coming-soon">Content Coming Soon...</div>
             </div>
@@ -68,7 +69,27 @@
                 <div class="coming-soon">Content Coming Soon...</div>
             </div>
         </section>
+
+        <section id="game">
+            <div class="glass-section game-container">
+                <h2>POKEPIA CROSSY</h2>
+                <div id="game-selection">
+                    <h3>Select Your Character</h3>
+                    <div class="character-list">
+                        <div class="char-opt active" data-char="bulbasaur">Bulbasaur</div>
+                        <div class="char-opt" data-char="quaxly">Quaxly</div>
+                        <div class="char-opt" data-char="pikachu">Pikachu</div>
+                        <div class="char-opt" data-char="ditto">Ditto</div>
+                        <div class="char-opt" data-char="slowpoke">Slowpoke</div>
+                        <div class="char-opt" data-char="gengar">Gengar</div>
+                    </div>
+                    <button id="start-game">START GAME</button>
+                </div>
+                <canvas id="gameCanvas" width="500" height="500" style="display:none;"></canvas>
+            </div>
+        </section>
     </main>
+
 
     <div class="cursor-outer"></div>
     <div class="cursor-inner"></div>

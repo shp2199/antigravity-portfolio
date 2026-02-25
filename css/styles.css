@@ -36,53 +36,60 @@ body {
     height: 100vh;
     z-index: -2;
     filter: blur(40px);
-    /* Reduced blur for sharper look */
     opacity: 0.6;
-    /* Increased opacity */
 }
 
 .blob {
     position: absolute;
-    width: 50vw;
-    height: 50vw;
+    width: 40vw;
+    height: 40vw;
     border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
-    animation: move 20s infinite alternate ease-in-out;
+    animation: bounceAround 30s infinite alternate ease-in-out;
 }
 
 .blob-1 {
     background: var(--lego-red);
-    top: -10%;
-    left: -10%;
+    top: 10%;
+    left: 10%;
 }
 
 .blob-2 {
     background: var(--lego-yellow);
-    bottom: -10%;
-    right: -10%;
-    animation-delay: -5s;
+    bottom: 10%;
+    right: 10%;
+    animation-delay: -7s;
 }
 
 .blob-3 {
     background: var(--lego-blue);
-    top: 30%;
+    top: 50%;
     left: 30%;
-    animation-duration: 25s;
-    filter: contrast(1.2);
+    animation-duration: 40s;
 }
 
-@keyframes move {
+@keyframes bounceAround {
     0% {
         transform: translate(0, 0) scale(1) rotate(0deg);
-        border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+    }
+
+    25% {
+        transform: translate(50vw, 20vh) scale(1.2) rotate(90deg);
+    }
+
+    50% {
+        transform: translate(20vw, 70vh) scale(0.9) rotate(180deg);
+    }
+
+    75% {
+        transform: translate(-30vw, 40vh) scale(1.1) rotate(270deg);
     }
 
     100% {
-        transform: translate(200px, 150px) scale(1.2) rotate(90deg);
-        border-radius: 60% 40% 40% 60% / 60% 60% 40% 40%;
+        transform: translate(10vw, -10vh) scale(1) rotate(360deg);
     }
 }
 
-/* Custom Cursor */
+/* Custom Cursor (Triangle) */
 .cursor-outer,
 .cursor-inner {
     position: fixed;
@@ -90,25 +97,29 @@ body {
     left: 0;
     pointer-events: none;
     z-index: 10000;
-    transition: transform 0.1s ease-out, opacity 0.3s ease;
+    transition: transform 0.05s ease-out, opacity 0.3s ease;
 }
 
 .cursor-outer {
-    width: 30px;
-    height: 30px;
-    border: 2px solid var(--lego-black);
-    border-radius: 50%;
-    margin-top: -15px;
-    margin-left: -15px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 25px solid var(--lego-black);
+    transform-origin: top center;
+    margin-left: -10px;
+    margin-top: 0;
+    filter: drop-shadow(4px 4px 0px rgba(0, 0, 0, 0.2));
 }
 
 .cursor-inner {
-    width: 8px;
-    height: 8px;
-    background: var(--lego-red);
-    border-radius: 50%;
-    margin-top: -4px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 12px solid var(--lego-red);
     margin-left: -4px;
+    margin-top: 6px;
 }
 
 /* Fairy Dust Particles */
@@ -152,11 +163,14 @@ nav {
     margin: 0 auto;
 }
 
-.logo {
-    font-size: 1.5rem;
+/* Navigation & Active State */
+nav ul li a.active-nav::after {
+    width: 100%;
+}
+
+nav ul li a.active-nav {
+    color: var(--lego-red);
     font-weight: 700;
-    color: var(--lego-black);
-    letter-spacing: 2px;
 }
 
 nav ul {
@@ -242,6 +256,84 @@ h2 {
     border: 2px dashed var(--lego-red);
     display: inline-block;
 }
+
+/* About Me section improvements */
+
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--lego-black);
+    background: var(--lego-yellow);
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    transform: rotate(-3deg);
+    margin-bottom: 2rem;
+    border: 3px solid var(--lego-black);
+    box-shadow: 6px 6px 0px var(--lego-black);
+}
+
+/* Game styling */
+.game-container {
+    max-width: 900px;
+}
+
+#game-selection {
+    margin: 2rem 0;
+}
+
+.character-list {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.char-opt {
+    padding: 0.8rem 1.2rem;
+    border: 3px solid var(--lego-black);
+    background: var(--lego-white);
+    cursor: none;
+    transition: all 0.2s;
+    font-weight: 700;
+    border-radius: 4px;
+}
+
+.char-opt:hover,
+.char-opt.active {
+    background: var(--lego-yellow);
+    transform: translateY(-5px);
+    box-shadow: 4px 4px 0px var(--lego-black);
+}
+
+#start-game {
+    padding: 1rem 3rem;
+    background: var(--lego-red);
+    border: 4px solid var(--lego-black);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: none;
+    box-shadow: 8px 8px 0px var(--lego-black);
+    transition: all 0.2s;
+    border-radius: 8px;
+}
+
+#start-game:active {
+    transform: translate(4px, 4px);
+    box-shadow: 4px 4px 0px var(--lego-black);
+}
+
+#gameCanvas {
+    background: #c6e3b8;
+    /* Grass color */
+    border: 5px solid var(--lego-black);
+    margin: 2rem auto;
+    display: block;
+    box-shadow: 12px 12px 0px var(--lego-black);
+    max-width: 100%;
+}
+
 
 /* Existing LEGO Card Overrides */
 .container {
