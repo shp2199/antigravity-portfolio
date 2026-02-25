@@ -169,17 +169,19 @@ nav ul {
 }
 
 nav ul li a {
-    text-decoration: none;
-    font-weight: 700;
-    color: var(--lego-black);
-    padding: 0.8rem 1.5rem;
-    background: var(--lego-white);
-    border: 3px solid var(--lego-black);
-    display: block;
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    color: var(--lego-black) !important;
+    padding: 0.8rem 1.5rem !important;
+    background: var(--lego-white) !important;
+    border: 3px solid var(--lego-black) !important;
+    display: block !important;
     transition: all 0.2s;
-    font-size: 1.1rem;
-    box-shadow: 4px 4px 0px var(--lego-black);
+    font-size: 1.1rem !important;
+    box-shadow: 4px 4px 0px var(--lego-black) !important;
+    text-transform: none !important;
 }
+
 
 /* Base tilt for all nav items */
 nav ul li:nth-child(odd) a {
