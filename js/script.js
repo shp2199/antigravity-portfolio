@@ -279,7 +279,6 @@ function drawPokemon(type, x, y, size) {
 }
 
 startBtn.addEventListener('click', () => {
-    console.log("Game started button clicked");
     selectionUI.style.display = 'none';
     gameArea.style.display = 'block';
     gameArea.scrollIntoView({ behavior: 'smooth' });
@@ -287,6 +286,7 @@ startBtn.addEventListener('click', () => {
     gameRunning = true;
     gameLoop();
 });
+
 
 
 
@@ -346,7 +346,6 @@ function exitGame() {
 
 function gameLoop() {
     if (!gameRunning) return;
-    if (!ctx) { console.error("Canvas context missing!"); return; }
     ctx.clearRect(0, 0, 500, 500);
 
     // Draw Background
